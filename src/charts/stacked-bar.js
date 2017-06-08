@@ -710,6 +710,14 @@ define(function(require){
             return this;
         };
 
+        exports.getData = function() {
+           return layers.map( (v) => ({name:v.key,quantity:d3Array.sum(v.map( (y) => y[1]-y[0] ))}) );
+        };
+        exports.getCategoryColorMap = function() {
+           return categoryColorMap;
+        };
+        
+
         /**
          * Gets or Sets the valueLabelFormat of the chart
          * @param  {String[]} _x Desired valueLabelFormat for the graph

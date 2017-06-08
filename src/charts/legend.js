@@ -8,7 +8,7 @@ define(function(require){
 
     const textHelper = require('./helpers/text');
     const colorHelper = require('./helpers/colors');
-
+    const uniq = (arrArg) => arrArg.filter((elem, pos, arr) => arr.indexOf(elem) == pos);
     /**
      * @typedef LegendChartData
      * @type {Object[]}
@@ -90,9 +90,10 @@ define(function(require){
             // colors
             colorScale,
             colorSchema = colorHelper.colorSchemas.britechartsColorSchema,
-
+            nameLabel = 'name',
             getId = ({id}) => id,
-            getName = ({name}) => name,
+            getName = ( d ) => d[nameLabel],
+
             getFormattedQuantity = ({quantity}) => numberFormat(quantity),
             getCircleFill = ({name}) => colorScale(name),
 
@@ -112,7 +113,7 @@ define(function(require){
             _selection.each(function(_data){
                 chartWidth = width - margin.left - margin.right;
                 chartHeight = height - margin.top - margin.bottom;
-                data = _data;
+                data = _data ;
 
                 buildColorScale();
                 buildSVG(this);
@@ -161,7 +162,7 @@ define(function(require){
          * @private
          */
         function buildColorScale() {
-            if (colorSchema) {
+            if (colorSchema && !colorScale) {
                 colorScale = d3Scale.scaleOrdinal().range(colorSchema);
             }
         }
@@ -375,6 +376,21 @@ define(function(require){
             newLine.append(() => lastEntry.node());
         }
 
+         /**
+         * Gets or Sets the nameLabel of the data
+         * @param  {Number} _x Desired nameLabel
+         * @return { nameLabel | module} Current nameLabel or Chart module to chain calls
+         * @public
+         */
+        exports.nameLabel = function(_x) {
+            if (!arguments.length) {
+                return nameLabel;
+            }
+            nameLabel = _x;
+
+            return this;
+        };
+
         /**
          * Clears the highlighted line entry
          */
@@ -396,7 +412,20 @@ define(function(require){
 
             return this;
         };
+        /**
+         * Gets or Sets the colorScale of the chart
+         * @param  {function} _x Color scheme array to get/set
+         * @return {number | module} Current colorScale or Donut Chart module to chain calls
+         * @public
+         */
+        exports.colorScale = function(_x) {
+            if (!arguments.length) {
+                return colorScale;
+            }
+            colorScale = _x;
 
+            return this;
+        };
         /**
          * Gets or Sets the height of the legend chart
          * @param  {number} _x Desired width for the chart

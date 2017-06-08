@@ -5,7 +5,7 @@ var d3Selection = require('d3-selection'),
     PubSub = require('pubsub-js'),
 
     colors = require('./../src/charts/helpers/colors'),
-
+    legend = require('./../src/charts/legend'),
     stackedBarChart = require('./../src/charts/stacked-bar'),
     tooltip = require('./../src/charts/tooltip'),
     stackedDataBuilder = require('./../test/fixtures/stackedBarDataBuilder'),
@@ -15,6 +15,8 @@ var d3Selection = require('d3-selection'),
 function createStackedBarChartWithTooltip(optionalColorSchema) {
     var stackedBar = stackedBarChart(),
         chartTooltip = tooltip(),
+        legendChart,
+        legendContainer = d3Selection.select('.js-legend-chart-container'),
         testDataSet = new stackedDataBuilder.StackedBarDataBuilder(),
         container = d3Selection.select('.js-stacked-bar-chart-tooltip-container'),
         containerWidth = container.node() ? container.node().getBoundingClientRect().width : false,
@@ -23,7 +25,7 @@ function createStackedBarChartWithTooltip(optionalColorSchema) {
 
     if (containerWidth) {
         dataset = testDataSet.with3Sources().build();
-
+        
         // StackedAreChart Setup and start
         stackedBar
             .tooltipThreshold(600)
@@ -47,8 +49,11 @@ function createStackedBarChartWithTooltip(optionalColorSchema) {
             stackedBar.colorSchema(optionalColorSchema);
         }
 
+
         container.datum(dataset.data).call(stackedBar);
 
+        legendChart = getLegendChart(stackedBar,stackedBar.getData(), optionalColorSchema);
+       
         // Tooltip Setup and start
         chartTooltip
             .topicLabel('values')
@@ -66,7 +71,52 @@ function createStackedBarChartWithTooltip(optionalColorSchema) {
         });
     }
 }
+function getInlineLegendChart(dataset, optionalColorSchema) {
+    var legendChart = legend(),
+        legendContainer = d3Selection.select('.js-inline-legend-chart-container'),
+        containerWidth = legendContainer.node() ? legendContainer.node().getBoundingClientRect().width : false;
 
+    if (containerWidth) {
+        d3Selection.select('.js-inline-legend-chart-container .britechart-legend').remove();
+
+        legendChart
+            .horizontal(true)
+            .width(containerWidth*0.6)
+            .markerSize(8)
+            .height(40)
+
+        if (optionalColorSchema) {
+            legendChart.colorSchema(optionalColorSchema);
+        }
+
+        legendContainer.datum(dataset).call(legendChart);
+
+        return legendChart;
+    }
+}
+function getLegendChart(stackedBar,dataset, optionalColorSchema) {
+    var legendChart = legend(),
+        legendContainer = d3Selection.select('.js-legend-chart-container'),
+        containerWidth = legendContainer.node() ? legendContainer.node().getBoundingClientRect().width : false;
+
+    if (containerWidth) {
+        d3Selection.select('.js-legend-chart-container .britechart-legend').remove();
+        let colorMap = stackedBar.getCategoryColorMap();
+        
+        legendChart
+            .width(containerWidth*0.8)
+            .height(200)
+            .colorScale( ({name}) => colorMap[name]);
+
+        if (optionalColorSchema) {
+            legendChart.colorSchema(optionalColorSchema);
+        }
+        
+        legendContainer.datum(dataset).call(legendChart);
+
+        return legendChart;
+    }
+}
 function createHorizontalStackedBarChart(optionalColorSchema) {
     var stackedBar = stackedBarChart(),
         chartTooltip = tooltip(),
